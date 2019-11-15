@@ -1,0 +1,39 @@
+# Trigger to make sure you can't check out more than your max items
+DELIMITER $$
+DROP TRIGGER IF EXISTS check_numCheckedOut $$
+CREATE TRIGGER check_numCheckedOut BEFORE INSERT ON Members
+FOR EACH ROW
+  BEGIN
+    IF (NEW.numCheckedOut > (SELECT maxResources FROM Associations
+                          WHERE Associations.associationID = NEW.associationID)) THEN
+      SIGNAL SQLSTATE '45000'
+          SET MESSAGE_TEXT = 'Can\'t have that many resources check out';
+    END IF ;
+  END $$
+DELIMITER ;
+
+
+# View checked out resources
+DROP VIEW IF EXISTS checked_out_resources;
+CREATE VIEW checked_out_resources AS
+    SELECT resourceID FROM Books WHERE resourceID IN
+      (SELECT resourceID FROM Resources WHERE checkedOut)
+  UNION
+    SELECT resourceID FROM Magazines WHERE resourceID IN
+      (SELECT resourceID FROM Resources WHERE checkedOut)
+  UNION
+    SELECT resourceID FROM Umbrellas WHERE resourceID IN
+      (SELECT resourceID FROM Resources WHERE checkedOut);
+
+# View overdue resources
+DROP VIEW IF EXISTS overdue_resources;
+CREATE VIEW overdue_resources AS
+  SELECT resourceID from Resources WHERE resourceID IN
+      (SELECT resourceID FROM Records WHERE
+          (returned = FALSE
+          AND
+          DATEDIFF(checkoutDate, CURRENT_TIMESTAMP) > 14
+            )
+        );
+
+

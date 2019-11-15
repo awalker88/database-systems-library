@@ -1,0 +1,72 @@
+DROP TABLE IF EXISTS Resources;
+CREATE TABLE Resources (
+  resourceID INT NOT NULL AUTO_INCREMENT,
+  type VARCHAR(255) NOT NULL,
+  checkedOut BOOLEAN DEFAULT FALSE NOT NULL,
+  PRIMARY KEY (resourceID)
+);
+
+DROP TABLE IF EXISTS Genres;
+CREATE TABLE Genres (
+  genreID INT NOT NULL AUTO_INCREMENT,
+  genre VARCHAR(100) NOT NULL,
+  PRIMARY KEY (genreID)
+);
+
+DROP TABLE IF EXISTS Books;
+CREATE TABLE Books (
+  resourceID int,
+  name VARCHAR(255) NOT NULL,
+  pages INT,
+  genre INT NOT NULL,
+  FOREIGN KEY (resourceID) REFERENCES Resources(resourceID),
+  FOREIGN KEY (genre) REFERENCES Genres(genreID)
+);
+
+DROP TABLE IF EXISTS Magazines;
+CREATE TABLE Magazines (
+  resourceId INT,
+  name VARCHAR(255) NOT NULL,
+  frequency VARCHAR(25),
+  FOREIGN KEY (resourceID) REFERENCES Resources(resourceID)
+);
+
+DROP TABLE IF EXISTS Umbrellas;
+CREATE TABLE Umbrellas(
+  resourceID INT,
+  color VARCHAR(255) NOT NULL,
+  FOREIGN KEY (resourceID) REFERENCES Resources(resourceID)
+);
+
+DROP TABLE IF EXISTS Associations;
+CREATE TABLE Associations (
+  associationID INT,
+  associationName VARCHAR(255),
+  maxResources INT,
+  PRIMARY KEY (associationID)
+);
+
+DROP TABLE IF EXISTS Members;
+CREATE TABLE Members (
+  memberID INT,
+  firstName VARCHAR(255) NOT NULL ,
+  lastName VARCHAR(255) NOT NULL ,
+  associationID INT NOT NULL,
+  email VARCHAR(255),
+  numCheckedOut INT DEFAULT 0,
+  fines REAL DEFAULT 0,
+  PRIMARY KEY (memberID),
+  FOREIGN KEY (associationID) REFERENCES Associations(associationID)
+);
+
+DROP TABLE IF EXISTS Records;
+CREATE TABLE Records (
+  transactionID INT AUTO_INCREMENT,
+  resourceID INT,
+  checkoutDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+  returnDate DATETIME,
+  returned BOOLEAN DEFAULT FALSE,
+  PRIMARY KEY (transactionID),
+  FOREIGN KEY (resourceID) REFERENCES Resources(resourceID)
+);
+
